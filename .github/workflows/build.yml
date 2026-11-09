@@ -19,21 +19,22 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.4'
+
     - name: Extract Project ZIP
       run: |
         unzip -q CarromAimAssistant-Android-Source.zip
-        cd CarromAimAssistant
-        gradle wrapper --gradle-version 8.4
-        chmod +x gradlew
 
     - name: Build Debug APK
       run: |
         cd CarromAimAssistant
-        ./gradlew assembleDebug --no-daemon
+        gradle assembleDebug --no-daemon
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: CarromAimAssistant-APK
         path: CarromAimAssistant/app/build/outputs/apk/debug/*.apk
-        
