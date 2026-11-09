@@ -24,9 +24,17 @@ jobs:
       with:
         gradle-version: '8.9'
 
-    - name: Extract Project ZIP
+    - name: Extract and Fix Target Compatibility
       run: |
         unzip -q CarromAimAssistant-Android-Source.zip
+        cd CarromAimAssistant
+        
+        # Align Java target to VERSION_17 matching Kotlin
+        sed -i 's/sourceCompatibility = JavaVersion.VERSION_1_8/sourceCompatibility = JavaVersion.VERSION_17/g' app/build.gradle.kts
+        sed -i 's/targetCompatibility = JavaVersion.VERSION_1_8/targetCompatibility = JavaVersion.VERSION_17/g' app/build.gradle.kts
+        
+        # Ensure gradle.properties skips strict mismatch enforcement if needed
+        echo "kotlin.jvm.target.validation.mode=warning" >> gradle.properties
 
     - name: Build Debug APK
       run: |
