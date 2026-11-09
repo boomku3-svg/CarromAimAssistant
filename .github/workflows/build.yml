@@ -24,17 +24,23 @@ jobs:
       with:
         gradle-version: '8.9'
 
-    - name: Extract and Fix Target Compatibility
+    - name: Extract Project and Fix Gradle Configuration
       run: |
         unzip -q CarromAimAssistant-Android-Source.zip
         cd CarromAimAssistant
         
-        # Align Java target to VERSION_17 matching Kotlin
-        sed -i 's/sourceCompatibility = JavaVersion.VERSION_1_8/sourceCompatibility = JavaVersion.VERSION_17/g' app/build.gradle.kts
-        sed -i 's/targetCompatibility = JavaVersion.VERSION_1_8/targetCompatibility = JavaVersion.VERSION_17/g' app/build.gradle.kts
+        # Override JVM targets directly in app/build.gradle.kts
+        python3 -c "
+        with open('app/build.gradle.kts', 'r') as f:
+            content = f.read()
+        content = content.replace('JavaVersion.VERSION_1_8', 'JavaVersion.VERSION_17')
+        content = content.replace('jvmTarget = \"1.8\"', 'jvmTarget = \"17\"')
+        with open('app/build.gradle.kts', 'w') as f:
+            f.write(content)
+        "
         
-        # Ensure gradle.properties skips strict mismatch enforcement if needed
-        echo "kotlin.jvm.target.validation.mode=warning" >> gradle.properties
+        # Disable Kotlin strict compiler checks
+        echo "kotlin.jvm.target.validation.mode=ignore" >> gradle.properties
 
     - name: Build Debug APK
       run: |
